@@ -83,7 +83,20 @@ const T={
 <tr><td>Decimal</td><td>0,25</td><td>0,2</td><td>0,8</td><td>0,05</td><td>0,02</td><td>0,3</td><td>0,7</td><td>0,04</td><td>0,1</td></tr></table>
 <h3>Calcular un percentatge</h3><div class="box">p % de N = N · p / 100</div>
 <p>Exemple: el 25 % de 80 és 80 · 25 / 100 = 20.</p>
-<p>Si en Jacint ven 36 kg de 48 kg, la raó és 36/48 = 3/4 = 0,75, és a dir, el 75 %.</p>`
+<p>Si en Jacint ven 36 kg de 48 kg, la raó és 36/48 = 3/4 = 0,75, és a dir, el 75 %.</p>`,
+7:`<h3>Teorema de Tales</h3><p>Si dues rectes paral·leles tallen dues rectes que es creuen, els segments que determinen són <b>proporcionals</b>.</p>
+<div class="box">AD/AB = AE/AC = DE/BC<br>AD/DB = AE/EC</div>
+<p>Exemple: AD = 3, DB = 6 i AE = 2. Quant val EC?</p>
+<div class="box">3/6 = 2/x<br>x = 6 · 2 / 3 = 4</div>
+<h3>Proporcionalitat aplicada</h3><p>Amb les ombres podem mesurar alçades. Una persona de 1,8 m fa una ombra de 2 m. Un arbre fa una ombra de 10 m. Quant fa l’arbre?</p>
+<div class="box">1,8/2 = x/10<br>x = 1,8 · 10 / 2 = 9 m</div>
+<p>Prova el Laboratori per veure el teorema en moviment.</p>`,
+8:`<h3>Figures semblants</h3><p>Dues figures són <b>semblants</b> si tenen la mateixa forma: els angles són iguals i els costats corresponents són proporcionals.</p>
+<h3>Raó de semblança</h3><p>És el quocient entre un costat de la figura nova i el costat corresponent de l’original. L’anomenem k.</p>
+<div class="box">Perímetres: raó k<br>Àrees: raó k²</div>
+<p>Exemple: un rectangle de 4 × 3 amb k = 2 passa a ser de 8 × 6. El perímetre passa de 14 a 28 (×2). L’àrea passa de 12 a 48 (×4).</p>
+<h3>Escales</h3><p>L’escala 1:50 vol dir que 1 cm al plànol són 50 cm reals. Un plànol i la realitat són figures semblants.</p>
+<p>Prova el Laboratori per veure com canvien costats, perímetre i àrea.</p>`
 };
 
 /* ---------- Exercicis ---------- */
@@ -117,13 +130,63 @@ const G={
 6(){
  const p=pick([5,10,20,25,30,40,50,75]),N=pick([40,80,120,200,240,360]);
  return {q:`Quant és el ${p} % de ${N}?`,a:N*p/100,sol:N*p/100};
+},
+7(){
+ if(R(0,2)==0){
+  const h=pick([1.5,1.8,2]),o=pick([2,3,4]),O=o*pick([4,5,6]);
+  const r=Math.round(h*O/o*100)/100;
+  return {q:`Una persona de ${String(h).replace('.',',')} m fa una ombra de ${o} m. En el mateix moment, un arbre fa una ombra de ${O} m. Quina alçada té l’arbre? (en m)`,a:r,sol:String(r).replace('.',',')};
+ }
+ const a=R(2,5),b=R(2,6),k=R(2,4),c=a*k,x=b*k;
+ return {q:`Dues rectes paral·leles tallen dues secants. AD = ${a}, DB = ${b} i AE = ${c}. Quant val EC? (AD/DB = AE/EC)`,a:x,sol:x};
+},
+8(){
+ const t=R(0,2);
+ if(t==0){const a=R(2,5),b=a+R(1,4),k=R(2,4);
+  return {q:`Un rectangle fa ${a} × ${b} cm. Un altre rectangle semblant té el costat llarg de ${b*k} cm. Quant fa el seu costat curt? (en cm)`,a:a*k,sol:a*k};}
+ if(t==1){const k=R(2,5);
+  return {q:`Dues figures són semblants amb raó de semblança ${k}. Quina és la raó entre les seves àrees?`,a:k*k,sol:k*k};}
+ const e=pick([100,200,500]),cm=R(2,8);
+ return {q:`Un plànol té escala 1:${e}. Una paret fa ${cm} cm al plànol. Quants metres fa a la realitat?`,a:cm*e/100,sol:cm*e/100};
 }
 };
+
+const N=x=>String(+x.toFixed(2)).replace('.',',');
+const L={
+7:{h:`<p>Mou el control. La recta de punts és paral·lela a BC. Les raons no canvien.</p>
+<svg viewBox="0 0 400 250" style="width:100%;color:var(--fg)" role="img" aria-label="Triangle amb una recta paral·lela a la base">
+<polygon points="200,15 50,230 350,230" fill="none" stroke="currentColor" stroke-width="2"/>
+<line id="pl" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4"/>
+<g fill="currentColor" font-size="15" font-family="Georgia,serif"><text x="195" y="11">A</text><text x="30" y="240">B</text><text x="356" y="240">C</text><text id="td"></text><text id="te"></text></g></svg>
+<input type="range" id="sl" min="10" max="90" value="40" style="width:100%;margin:8px 0" aria-label="Posició de la paral·lela">
+<table id="ro"></table>`,
+i(){
+ const d=(p,q)=>Math.hypot(p[0]-q[0],p[1]-q[1])/25,A=[200,15],B=[50,230],C=[350,230];
+ const u=()=>{const t=sl.value/100,D=[A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t],E=[A[0]+(C[0]-A[0])*t,A[1]+(C[1]-A[1])*t];
+  pl.setAttribute("x1",D[0]);pl.setAttribute("y1",D[1]);pl.setAttribute("x2",E[0]);pl.setAttribute("y2",E[1]);
+  td.setAttribute("x",D[0]-18);td.setAttribute("y",D[1]+4);td.textContent="D";te.setAttribute("x",E[0]+8);te.setAttribute("y",E[1]+4);te.textContent="E";
+  const AD=d(A,D),DB=d(D,B),AE=d(A,E),EC=d(E,C),DE=d(D,E),BC=d(B,C),AB=d(A,B),AC=d(A,C);
+  ro.innerHTML=`<tr><td>AD / DB</td><td>${N(AD)} / ${N(DB)}</td><td>${N(AD/DB)}</td></tr><tr><td>AE / EC</td><td>${N(AE)} / ${N(EC)}</td><td>${N(AE/EC)}</td></tr><tr><td>AD / AB</td><td>${N(AD)} / ${N(AB)}</td><td>${N(AD/AB)}</td></tr><tr><td>AE / AC</td><td>${N(AE)} / ${N(AC)}</td><td>${N(AE/AC)}</td></tr><tr><td>DE / BC</td><td>${N(DE)} / ${N(BC)}</td><td>${N(DE/BC)}</td></tr>`;};
+ sl.oninput=u;u();
+}},
+8:{h:`<p>El rectangle de línia contínua és semblant al de punts (4 × 3). Canvia la raó de semblança k.</p>
+<svg viewBox="0 0 360 200" style="width:100%;color:var(--fg)" role="img" aria-label="Rectangle ampliat o reduït">
+<rect x="20" y="130" width="80" height="60" fill="none" stroke="currentColor" stroke-dasharray="5 4"/>
+<rect id="rc" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+<label>k = <b id="kv"></b></label>
+<input type="range" id="sl" min="0.5" max="3" step="0.5" value="1" style="width:100%;margin:8px 0" aria-label="Raó de semblança">
+<table id="ro"></table>`,
+i(){
+ const u=()=>{const k=+sl.value;rc.setAttribute("x",20);rc.setAttribute("y",190-60*k);rc.setAttribute("width",80*k);rc.setAttribute("height",60*k);
+  kv.textContent=N(k);
+  ro.innerHTML=`<tr><th></th><th>Original</th><th>Nou</th><th>Raó</th></tr><tr><td>Costats</td><td>4 × 3</td><td>${N(4*k)} × ${N(3*k)}</td><td>${N(k)}</td></tr><tr><td>Perímetre</td><td>14</td><td>${N(14*k)}</td><td>${N(k)}</td></tr><tr><td>Àrea</td><td>12</td><td>${N(12*k*k)}</td><td>${N(k*k)}</td></tr>`;};
+ sl.oninput=u;u();
+}}};
 
 const S=[
  ["Raó i proporció",1],["Càlcul amb raons i proporcions",2],["Situacions de proporcionalitat",3],
  ["Proporcionalitat directa",4],["Proporcionalitat inversa",5],["Proporcionalitat en percentatges",6],
- ["Teorema de Tales. Proporcionalitat aplicada",0],["Semblança",0]
+ ["Teorema de Tales. Proporcionalitat aplicada",7],["Semblança",8]
 ];
 
 const app=document.getElementById("app");
@@ -139,12 +202,13 @@ function open(k){cur=k;tab="t";ok=tot=0;render();}
 function render(){
  const i=S.findIndex(s=>s[1]===cur);
  app.innerHTML=`<button class="back" id="bk">Tornar als apartats</button><h2>${i+1}. ${S[i][0]}</h2>
- <div class="tabs"><button id="bt" class="${tab=="t"?"on":""}">Teoria</button><button id="be" class="${tab=="e"?"on":""}">Exercicis</button></div>
+ <div class="tabs"><button id="bt" class="${tab=="t"?"on":""}">Teoria</button>${cur>6?`<button id="bl" class="${tab=="l"?"on":""}">Laboratori</button>`:""}<button id="be" class="${tab=="e"?"on":""}">Exercicis</button></div>
  <div id="c"></div>`;
  bk.onclick=home;
  bt.onclick=()=>{tab="t";render()};
  be.onclick=()=>{tab="e";newEx();render()};
- if(tab=="t")c.innerHTML=T[cur];else drawEx();
+ if(cur>6)bl.onclick=()=>{tab="l";render()};
+ if(tab=="t")c.innerHTML=T[cur];else if(tab=="l"){c.innerHTML=L[cur].h;L[cur].i()}else drawEx();
 }
 function newEx(){ex=G[cur]();done=false;}
 function drawEx(){
