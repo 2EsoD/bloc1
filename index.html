@@ -169,18 +169,40 @@ i(){
   ro.innerHTML=`<tr><td>AD / DB</td><td>${N(AD)} / ${N(DB)}</td><td>${N(AD/DB)}</td></tr><tr><td>AE / EC</td><td>${N(AE)} / ${N(EC)}</td><td>${N(AE/EC)}</td></tr><tr><td>AD / AB</td><td>${N(AD)} / ${N(AB)}</td><td>${N(AD/AB)}</td></tr><tr><td>AE / AC</td><td>${N(AE)} / ${N(AC)}</td><td>${N(AE/AC)}</td></tr><tr><td>DE / BC</td><td>${N(DE)} / ${N(BC)}</td><td>${N(DE/BC)}</td></tr>`;};
  sl.oninput=u;u();
 }},
-8:{h:`<p>El rectangle de línia contínua és semblant al de punts (4 × 3). Canvia la raó de semblança k.</p>
-<svg viewBox="0 0 360 200" style="width:100%;color:var(--fg)" role="img" aria-label="Rectangle ampliat o reduït">
-<rect x="20" y="130" width="80" height="60" fill="none" stroke="currentColor" stroke-dasharray="5 4"/>
-<rect id="rc" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
-<label>k = <b id="kv"></b></label>
-<input type="range" id="sl" min="0.5" max="3" step="0.5" value="1" style="width:100%;margin:8px 0" aria-label="Raó de semblança">
+8:{h:`<p>Tria una forma o dibuixa la teva. La de punts és l’original. Canvia k i la nova s’amplia o es redueix sense deformar-se.</p>
+<div class="tabs" id="mn" style="flex-wrap:wrap;margin-bottom:12px"></div>
+<svg id="sv" viewBox="0 0 420 300" style="width:100%;color:var(--fg);border:1px solid var(--line)" role="img" aria-label="Forma original i forma ampliada"></svg>
+<div id="dr" class="acts" style="display:none;align-items:center;flex-wrap:wrap"><button id="cl">Tanca la forma</button><button id="er">Esborra</button><span class="score" style="margin:0">Fes clic al requadre per posar vèrtexs (mínim 3).</span></div>
+<p style="margin-top:14px"><label>k = <b id="kv"></b></label></p>
+<input type="range" id="sl" min="0.5" max="3" step="0.1" value="1" style="width:100%;margin:0 0 8px" aria-label="Raó de semblança">
 <table id="ro"></table>`,
 i(){
- const u=()=>{const k=+sl.value;rc.setAttribute("x",20);rc.setAttribute("y",190-60*k);rc.setAttribute("width",80*k);rc.setAttribute("height",60*k);
-  kv.textContent=N(k);
-  ro.innerHTML=`<tr><th></th><th>Original</th><th>Nou</th><th>Raó</th></tr><tr><td>Costats</td><td>4 × 3</td><td>${N(4*k)} × ${N(3*k)}</td><td>${N(k)}</td></tr><tr><td>Perímetre</td><td>14</td><td>${N(14*k)}</td><td>${N(k)}</td></tr><tr><td>Àrea</td><td>12</td><td>${N(12*k*k)}</td><td>${N(k*k)}</td></tr>`;};
- sl.oninput=u;u();
+ const U=20,AX=20,AY=285;
+ const pent=[],star=[];
+ for(let j=0;j<5;j++){const t=-Math.PI/2+j*2*Math.PI/5;pent.push([2.4*Math.cos(t),2.4*Math.sin(t)]);}
+ for(let j=0;j<10;j++){const t=-Math.PI/2+j*Math.PI/5,r=j%2?1.1:2.4;star.push([r*Math.cos(t),r*Math.sin(t)]);}
+ const SH={"Rectangle":[[0,0],[4,0],[4,3],[0,3]],"Triangle":[[0,3],[4,3],[2,0]],"Pentàgon":pent,"Estrella":star,"Casa":[[0,4],[0,2],[2,0],[4,2],[4,4]]};
+ let Q=null,H=0,pts=[],cur="Rectangle";
+ const shf=q=>{const x0=Math.min(...q.map(v=>v[0])),y0=Math.min(...q.map(v=>v[1]));return q.map(v=>[v[0]-x0,v[1]-y0]);};
+ const set=q=>{Q=shf(q);H=Math.max(...Q.map(v=>v[1]));};
+ const per=q=>q.reduce((t,v,j)=>{const n=q[(j+1)%q.length];return t+Math.hypot(v[0]-n[0],v[1]-n[1])},0);
+ const ar=q=>Math.abs(q.reduce((t,v,j)=>{const n=q[(j+1)%q.length];return t+v[0]*n[1]-n[0]*v[1]},0))/2;
+ const f=(q,k)=>q.map(v=>[AX+v[0]*U*k,AY-(H-v[1])*U*k].map(z=>z.toFixed(1)).join(",")).join(" ");
+ const u=()=>{
+  const k=+sl.value;kv.textContent=N(k);sl.disabled=!Q;
+  if(!Q){sv.innerHTML=(pts.length>1?`<polyline points="${pts.map(v=>v.join(",")).join(" ")}" fill="none" stroke="currentColor" stroke-width="2"/>`:"")+pts.map(v=>`<circle cx="${v[0]}" cy="${v[1]}" r="4" fill="currentColor"/>`).join("");ro.innerHTML="";return;}
+  sv.innerHTML=`<polygon points="${f(Q,1)}" fill="none" stroke="currentColor" stroke-dasharray="5 4"/><polygon points="${f(Q,k)}" fill="none" stroke="currentColor" stroke-width="2.5"/>`;
+  const p0=per(Q),a0=ar(Q);
+  ro.innerHTML=`<tr><th></th><th>Original</th><th>Nou</th><th>Raó</th></tr><tr><td>Perímetre</td><td>${N(p0)}</td><td>${N(p0*k)}</td><td>${N(k)}</td></tr><tr><td>Àrea</td><td>${N(a0)}</td><td>${N(a0*k*k)}</td><td>${N(k*k)}</td></tr>`;
+ };
+ const menu=()=>{mn.innerHTML=Object.keys(SH).concat("Dibuixa la teva").map(n=>`<button class="${n==cur?"on":""}">${n}</button>`).join("");
+  mn.querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=b.textContent;
+   if(cur=="Dibuixa la teva"){Q=null;pts=[];dr.style.display="flex";}else{set(SH[cur]);dr.style.display="none";}
+   menu();u();});};
+ sv.onclick=e=>{if(Q)return;const r=sv.getBoundingClientRect();pts.push([+((e.clientX-r.left)*420/r.width).toFixed(1),+((e.clientY-r.top)*300/r.height).toFixed(1)]);u();};
+ cl.onclick=()=>{if(pts.length<3)return;const x0=Math.min(...pts.map(v=>v[0])),y0=Math.min(...pts.map(v=>v[1])),w=Math.max(...pts.map(v=>v[0]))-x0,h=Math.max(...pts.map(v=>v[1]))-y0,s=90/Math.max(w,h,1)/U;set(pts.map(v=>[(v[0]-x0)*s,(v[1]-y0)*s]));u();};
+ er.onclick=()=>{Q=null;pts=[];u();};
+ sl.oninput=u;set(SH.Rectangle);menu();u();
 }}};
 
 const S=[
